@@ -10,7 +10,6 @@ class Section
         @rows = rows.to_i
 
         @seating = Array.new(@columns) { Array.new(@rows) }
-
     end
 end
 
@@ -18,22 +17,16 @@ class Airplane
     attr_accessor :sections
     attr_accessor :no_of_sections
     attr_reader :no_of_seats
-    attr_reader :no_of_window_seats
-    attr_reader :no_of_aisle_seats
 
     def initialize(input)
         @no_of_sections = input.length
         @sections = []
-
-        p input 
 
         @no_of_sections.times do |i|
             @sections << Section.new(input[i][1],input[i][3]) 
         end
 
         @no_of_seats = total_seats(input)
-        @no_of_window_seats = window_seats
-        @no_of_aisle_seats = aisle_seats
 
     end
 
@@ -42,26 +35,6 @@ class Airplane
 
         input.length.times do |i|
             total = total + (input[i][1].to_i * input[i][3].to_i)
-        end
-
-        return total
-    end
-
-    def window_seats
-        @sections[0].rows + @sections[-1].rows
-    end
-
-    def aisle_seats
-        total = 0
-
-        total = @sections[0].rows + @sections[-1].rows
-
-        for i in 1..@sections.length-2
-            if(@sections[i].columns > 1)
-                total = @sections[i].rows * 2 + total
-            else
-                total = @sections[i].rows + total
-            end
         end
 
         return total
@@ -95,101 +68,71 @@ def split_into_arrays(input)
 
 end
 
-def fill_seats(air1,passengers)
-    fill_isle_seats(air1,passengers) 
-    fill_window_seats(air1 )
-    fill_center_seats(air1)
+def fill_seats(test_plane)
+    fill_isle_seats(test_plane) 
+    fill_window_seats(test_plane )
+    fill_center_seats(test_plane)
 
-    air1.sections.each do |section|
-        for i in 0..section.rows-1
-            for j in 0..section.columns-1
-                print "#{section.seating[j][i]}\t"
-                if(j == section.columns-1)
-                    puts "\n"
-                end
-            end
-        end
-       
-        puts "NEXT SECTION" unless (section == air1.sections[-1]) 
-        puts "\t\t"
-    end
+    print_arrangement(test_plane)
+
 end
 
-def max_rows(air1)
-    max = 0
-    air1.sections.each do |section|
-        if(section.rows > max)
-            max = section.rows
-        end
-    end
-    return max
-end
 
-def max_columns(air1)
-    max = 0
-    air1.sections.each do |section|
-        if(section.columns > max)
-            max = section.columns
-        end
-    end
-    return max-2
-end
-
-def fill_isle_seats(air1,passengers)
-    air1.sections.each do |section|
-        fill_front_aisle(section,air1)
+def fill_isle_seats(test_plane)
+    test_plane.sections.each do |section|
+        fill_front_aisle(section,test_plane)
     end 
-    fill_other_aisles(air1)
+    fill_other_aisles(test_plane)
 
 end
 
-def fill_front_aisle(section,air1)
-    if(section == air1.sections[0])
+def fill_front_aisle(section,test_plane)
+    if(section == test_plane.sections[0])
         if($passenger_no < $passengers)
             section.seating[section.columns - 1][0] = $passenger_no
-            $passenger_no = $passenger_no + 1
+            increment_passenger_no
         end
-    elsif(section == air1.sections[-1])
+    elsif(section == test_plane.sections[-1])
         if($passenger_no < $passengers)
             section.seating[0][0] = $passenger_no
-            $passenger_no = $passenger_no + 1
+            increment_passenger_no
         end
     else
         if($passenger_no < $passengers)
             section.seating[0][0] = $passenger_no
-            $passenger_no = $passenger_no + 1
+            increment_passenger_no
         end
         if($passenger_no < $passengers)
             section.seating[section.columns - 1][0] = $passenger_no
-            $passenger_no = $passenger_no + 1
+            increment_passenger_no
         end
     end
 end
 
-def fill_other_aisles(air1)
-    max_no = max_rows(air1)
+def fill_other_aisles(test_plane)
+    max_no = max_rows(test_plane)
 
     for i in 1..max_no - 1
-        air1.sections.each do |section|
+        test_plane.sections.each do |section|
             if(section.rows > i)
-                if(section == air1.sections[0])
+                if(section == test_plane.sections[0])
                     if($passenger_no < $passengers)
                         section.seating[section.columns - 1][i] = $passenger_no
-                        $passenger_no = $passenger_no + 1
+                        increment_passenger_no
                     end
-                elsif(section == air1.sections[-1])
+                elsif(section == test_plane.sections[-1])
                     if($passenger_no < $passengers)
                         section.seating[0][i] = $passenger_no
-                        $passenger_no = $passenger_no + 1
+                        increment_passenger_no
                     end
                 else
                     if($passenger_no < $passengers)
                         section.seating[0][i] = $passenger_no
-                        $passenger_no = $passenger_no + 1
+                        increment_passenger_no
                     end
                     if($passenger_no < $passengers)
                         section.seating[section.columns - 1][i] = $passenger_no
-                        $passenger_no = $passenger_no + 1
+                        increment_passenger_no
                     end
                 end
             end
@@ -197,21 +140,21 @@ def fill_other_aisles(air1)
     end
 end
 
-def fill_window_seats(air1)
-    max_no = max_rows(air1)
+def fill_window_seats(test_plane)
+    max_no = max_rows(test_plane)
 
     for i in 0..max_no - 1
-        air1.sections.each do |section|
+        test_plane.sections.each do |section|
             if(section.rows > i)
-                if(section == air1.sections[0])
+                if(section == test_plane.sections[0])
                     if($passenger_no < $passengers)
                         section.seating[0][i] = $passenger_no
-                        $passenger_no = $passenger_no + 1
+                        increment_passenger_no
                     end
-                elsif(section == air1.sections[-1])
+                elsif(section == test_plane.sections[-1])
                     if($passenger_no < $passengers)
                         section.seating[section.columns - 1][i] = $passenger_no
-                        $passenger_no = $passenger_no + 1
+                        increment_passenger_no
                     end
                 end
             end
@@ -219,11 +162,11 @@ def fill_window_seats(air1)
     end
 end
 
-def fill_center_seats(air1)
-    max_rows = max_rows(air1)
+def fill_center_seats(test_plane)
+    max_rows = max_rows(test_plane)
 
     for i in 0..max_rows - 1
-        air1.sections.each do |section|
+        test_plane.sections.each do |section|
             for j in 1..section.columns-2
                 if(section.rows > i)
                     if($passenger_no < $passengers)
@@ -236,21 +179,69 @@ def fill_center_seats(air1)
     end
 end
 
+def print_arrangement(test_plane)
+    puts "SITTING ARRANGEMENT:"
+
+    test_plane.sections.each do |section|
+        for i in 0..section.rows-1
+            for j in 0..section.columns-1
+                print "#{section.seating[j][i]}\t"
+                if(j == section.columns-1)
+                    puts "\n"
+                end
+            end
+        end
+
+        puts "NEXT SECTION" unless (section == test_plane.sections[-1]) 
+        puts "\t\t"
+    end
+
+end
+
+def max_rows(test_plane)
+    max = 0
+    test_plane.sections.each do |section|
+        if(section.rows > max)
+            max = section.rows
+        end
+    end
+    return max
+end
+
+def max_columns(test_plane)
+    max = 0
+    test_plane.sections.each do |section|
+        if(section.columns > max)
+            max = section.columns
+        end
+    end
+    return max-2
+end
+
+def increment_passenger_no
+    $passenger_no = $passenger_no + 1
+end
+
 puts "Enter your rows and columns in the form of a 2D array"
 
 input = gets.chomp
 
 puts "Enter the no of passengers"
 
-passengers = gets.chomp.to_i
-
-$passengers = passengers+1
+$passengers = gets.chomp.to_i + 1
 
 input = break_into_rows_and_columns(input)
 
-air1 = Airplane.new(input)
-$passenger_no = 1
+test_plane = Airplane.new(input)
 
-fill_seats(air1,passengers)
+if($passengers > test_plane.no_of_seats)
+    puts "Passenger input is greater than the seats available"
+else
+    $passenger_no = 1
+
+    fill_seats(test_plane)
+end
+
+
 
 
